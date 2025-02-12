@@ -3,34 +3,28 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Cloning the repository
-                git branch: 'main', url: 'https://github.com/your-username/your-repo-name.git'
+                git branch: 'master', url: 'https://github.com/MisturaRaheem/Maven.git'
             }
         }
         stage('Build') {
             steps {
-                // Building the Maven project
-                sh 'mvn clean package'
+                bat 'mvn clean package'
             }
         }
         stage('Test') {
             steps {
-                // Running unit tests
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
         stage('Deploy') {
             steps {
-                // Example placeholder for deployment
                 echo 'Deployment stage (example only)'
             }
         }
     }
     post {
         always {
-            // Archiving the packaged WAR file
             archiveArtifacts artifacts: '**/target/*.war', allowEmptyArchive: true
-            // Collecting JUnit test reports
             junit 'target/surefire-reports/*.xml'
         }
     }
