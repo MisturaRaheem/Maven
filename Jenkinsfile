@@ -1,31 +1,52 @@
 pipeline {
     agent any
+    
+    environment {
+        DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
+        DOCKER_IMAGE = "misturaraheem/mavenwebapp:${BUILD_NUMBER}"
+    }
+    
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/MisturaRaheem/Maven.git'
+                // Checkout code from GitHub repository
+                checkout scm
             }
         }
-        stage('Build') {
+        
+        stage('Build Maven Project') {
             steps {
-                bat 'mvn clean package'
+                // Build the Maven project
+                sh 'mvn clean package'
             }
         }
-        stage('Test') {
+        
+        stage('Docker Login') {
             steps {
-                bat 'mvn test'
+                // Login to Docker Hub
+                sh 'echo $DOCKER_HUB_CREDS_PSW | docker login -u $DOCKER_HUB_CREDS_USR --password-stdin'
             }
         }
-        stage('Deploy') {
+        
+        stage('Docker Build') {
             steps {
-                echo 'Deployment stage (example only)'
+                // Build Docker image
+                sh "docker build -t ${DOCKER_IMAGE} ."
+            }
+        }
+        
+        stage('Docker Push') {
+            steps {
+                // Push Docker image to Docker Hub
+                sh "docker push ${DOCKER_IMAGE}"
             }
         }
     }
+    
     post {
         always {
-            archiveArtifacts artifacts: '**/target/*.war', allowEmptyArchive: true
-            junit 'target/surefire-reports/*.xml'
+            // Logout from Docker Hub
+            sh 'docker logout'
         }
     }
 }
