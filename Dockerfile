@@ -1,10 +1,10 @@
+FROM maven:3.8-openjdk-11 AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package
+
 FROM tomcat:9-jdk11
-
-# Make sure the WAR file exists by checking first
-RUN mkdir -p /usr/local/tomcat/webapps/ROOT
-
-# Copy the WAR file - use the specific filename instead of wildcard
-COPY target/mavenwebapp-0.0.1-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
-
+COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 EXPOSE 8085
 CMD ["catalina.sh", "run"]
